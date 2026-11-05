@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#244879">
+  <title>Student Wallet — Ví Sinh Viên</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --navy: #244879;
+      --navy-dark: #19375f;
+      --blue: #4779c7;
+      --blue-light: #eaf1ff;
+      --mint: #62c5bd;
+      --purple: #a97dcc;
+      --green: #23885c;
+      --green-light: #e9f8ef;
+      --red: #c94d5a;
+      --red-light: #fff0f1;
+      --ink: #17243b;
+      --muted: #6c7890;
+      --line: #e2e8f2;
+      --surface: #fff;
+      --page: #f2f5fc;
+      --shadow: 0 12px 32px rgba(34, 57, 98, .09);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+        Roboto, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--page);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { touch-action: manipulation; }
+    button:focus-visible, input:focus-visible, select:focus-visible,
+    textarea:focus-visible, a:focus-visible {
+      outline: 3px solid #8bb6ff;
+      outline-offset: 2px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Welcome */
+    .welcome {
+      min-height: 100vh;
+      padding: 28px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 8% 12%, #dce8ff 0 10%, transparent 10.2%),
+        linear-gradient(135deg, #eaf1ff, #f8faff 55%, #e8efff);
+    }
+
+    .welcome-layout {
+      width: min(1050px, 100%);
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .welcome-copy {
+      padding: 20px;
+    }
+
+    .welcome-logo {
+      color: var(--navy);
+      font-weight: 850;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .wallet-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: var(--navy);
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 8px 18px rgba(36, 72, 121, .2);
+      flex: 0 0 auto;
+    }
+
+    .welcome-copy h1 {
+      font-size: clamp(2.2rem, 5vw, 4.1rem);
+      line-height: 1.07;
+      margin: 0 0 14px;
+      color: var(--navy-dark);
+    }
+
+    .welcome-copy p {
+      max-width: 480px;
+      color: #53627d;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .welcome-art {
+      margin-top: 30px;
+      font-size: clamp(3rem, 8vw, 6rem);
+      letter-spacing: 8px;
+    }
+
+    .login-card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid #e4e9f3;
+      border-radius: 24px;
+      padding: clamp(22px, 4vw, 36px);
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h2 {
+      margin: 0 0 8px;
+      text-align: center;
+      color: var(--navy-dark);
+      font-size: 1.8rem;
+    }
+
+    .login-card .intro {
+      margin: 0 0 22px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .form-stack { display: grid; gap: 14px; }
+
+    .field label {
+      display: block;
+      font-size: .88rem;
+      font-weight: 750;
+      color: #34425d;
+      margin-bottom: 7px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      min-height: 46px;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid #dce3ee;
+      background: white;
+      color: var(--ink);
+    }
+
+    .field textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    .primary, .secondary, .danger-button {
+      border: 0;
+      border-radius: 12px;
+      min-height: 46px;
+      padding: 11px 16px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--navy);
+      color: white;
+    }
+
+    .primary:hover { background: var(--navy-dark); }
+
+    .secondary {
+      background: var(--blue-light);
+      color: var(--navy);
+      border: 1px solid #d8e4fa;
+    }
+
+    .danger-button {
+      color: var(--red);
+      background: var(--red-light);
+      border: 1px solid #f5d6d9;
+    }
+
+    .link-row {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .link-row a { color: var(--navy); font-weight: 750; }
+
+    /* Main app layout */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--navy-dark);
+      color: white;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 24px;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .sidebar-brand .wallet-mark {
+      background: rgba(255,255,255,.14);
+      box-shadow: none;
+    }
+
+    .nav-list { display: grid; gap: 8px; }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      color: #e9f0ff;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      background: rgba(255,255,255,.16);
+      color: white;
+    }
+
+    .nav-icon { width: 22px; text-align: center; font-size: 1.1rem; }
+
+    .logout-button {
+      margin-top: auto;
+      color: #e9f0ff;
+      background: transparent;
+      border: 0;
+      text-align: left;
+      padding: 14px 10px;
+      cursor: pointer;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .greeting h1 {
+      margin: 0;
+      color: var(--navy-dark);
+      font-size: clamp(1.45rem, 3vw, 2rem);
+    }
+
+    .greeting p {
+      margin: 5px 0 0;
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .period-select {
+      min-height: 42px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 12px;
+      color: var(--ink);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 5px 18px rgba(37, 61, 99, .035);
+    }
+
+    .card-panel h2, .card-panel h3 {
+      color: var(--ink);
+      margin: 0 0 14px;
+    }
+
+    .overview-banner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .balance-block, .plan-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .plan-block { border-left: 1px solid var(--line); }
+
+    .round-icon {
+      width: 56px;
+      height: 56px;
+      flex: 0 0 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--blue-light);
+      color: var(--navy);
+      font-size: 1.6rem;
+    }
+
+    .metric-label { color: var(--muted); font-size: .88rem; }
+    .metric-value {
+      display: block;
+      color: var(--navy-dark);
+      font-size: clamp(1.25rem, 2.5vw, 1.8rem);
+      font-weight: 850;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr);
+      gap: 18px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .stat-card .metric-value { font-size: clamp(1rem, 2vw, 1.35rem); }
+    .stat-card.income .round-icon { background: var(--green-light); color: var(--green); }
+    .stat-card.expense .round-icon { background: var(--red-light); color: var(--red); }
+
+    .chart-container {
+      height: 260px;
+      position: relative;
+    }
+
+    .suggestion {
+      background: linear-gradient(145deg, #eff4ff, #f8f9ff);
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 100%;
+      color: #34425d;
+    }
+
+    .suggestion h3 { margin: 0 0 10px; color: var(--navy-dark); }
+    .suggestion .mascot { text-align: center; font-size: 3.2rem; margin-top: 22px; }
+
+    .alert {
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--green-light);
+      color: #176444;
+      border: 1px solid #d2f0dc;
+      line-height: 1.55;
+    }
+
+    .alert.low {
+      background: var(--red-light);
+      color: #8d2935;
+      border-color: #f2d1d5;
+    }
+
+    .category-list { display: grid; gap: 14px; }
+    .category-row { display: grid; gap: 7px; }
+    .category-info { display: flex; justify-content: space-between; gap: 10px; font-size: .92rem; }
+    .progress { height: 9px; background: #edf1f7; border-radius: 99px; overflow: hidden; }
+    .progress span { display: block; height: 100%; background: var(--blue); border-radius: inherit; }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .category-checks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .check-card {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px;
+      background: #fbfcff;
+      min-width: 0;
+    }
+
+    .check-card label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: .88rem;
+      font-weight: 650;
+    }
+
+    .check-card input { accent-color: var(--navy); }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+      font-size: .88rem;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th { background: #edf3ff; color: var(--navy-dark); }
+    tr:last-child td { border-bottom: 0; }
+
+    .transaction-list { display: grid; gap: 10px; }
+    .transaction {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px;
+      background: white;
+    }
+
+    .transaction-title { font-weight: 750; }
+    .transaction-meta { color: var(--muted); font-size: .8rem; margin-top: 4px; }
+    .amount-out { color: var(--red); font-weight: 800; white-space: nowrap; }
+    .amount-in { color: var(--green); font-weight: 800; white-space: nowrap; }
+
+    .notice-small { color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    .mobile-nav {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .app-shell { grid-template-columns: 76px minmax(0, 1fr); }
+      .sidebar { padding: 16px 9px; }
+      .sidebar-brand { justify-content: center; padding: 4px 0 22px; }
+      .sidebar-brand .brand-text, .nav-label, .logout-label { display: none; }
+      .nav-button { justify-content: center; padding: 13px 8px; }
+      .nav-icon { width: auto; font-size: 1.25rem; }
+      .logout-button { text-align: center; }
+      .overview-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .welcome { padding: 14px; }
+      .welcome-layout { grid-template-columns: 1fr; gap: 12px; }
+      .welcome-copy { padding: 12px 8px 0; }
+      .welcome-logo { margin-bottom: 16px; }
+      .welcome-art { display: none; }
+      .login-card { padding: 22px 18px; }
+      .app-shell { display: block; min-height: 100vh; }
+      .sidebar { display: none; }
+      .main { padding: 14px 13px calc(88px + env(safe-area-inset-bottom)); }
+      .topbar { align-items: flex-start; }
+      .top-actions { flex-direction: column; align-items: flex-end; }
+      .overview-banner { grid-template-columns: 1fr; }
+      .plan-block { border-left: 0; border-top: 1px solid var(--line); }
+      .stat-grid { grid-template-columns: 1fr; }
+      .two-column { grid-template-columns: 1fr; }
+      .category-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card-panel { padding: 15px; }
+      .chart-container { height: 235px; }
+
+      .mobile-nav {
+        position: fixed;
+        z-index: 20;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: space-around;
+        gap: 2px;
+        padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
+        background: rgba(255,255,255,.97);
+        border-top: 1px solid var(--line);
+        box-shadow: 0 -7px 22px rgba(35, 57, 94, .09);
+        backdrop-filter: blur(12px);
+      }
+
+      .mobile-nav .nav-button {
+        flex: 1;
+        display: grid;
+        justify-items: center;
+        gap: 3px;
+        padding: 5px 2px;
+        color: var(--muted);
+        font-size: .66rem;
+        border-radius: 10px;
+      }
+
+      .mobile-nav .nav-button.active {
+        color: var(--navy);
+        background: var(--blue-light);
+      }
+
+      .mobile-nav .nav-icon { font-size: 1.2rem; }
+      .mobile-nav .nav-label { display: block; }
+    }
+
+    @media (max-width: 360px) {
+      .category-checks { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; }
+      .top-actions { align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Onboarding -->
+  <section class="welcome" id="welcomeScreen">
+    <div class="welcome-layout">
+      <div class="welcome-copy">
+        <div class="welcome-logo">
+          <span class="wallet-mark" aria-hidden="true">▣</span>
+          <span>Student Wallet</span>
+        </div>
+        <h1 id="welcomeHeading">Ví Sinh Viên</h1>
+        <p id="welcomeDescription">
+          Quản lý chi tiêu thông minh, lập kế hoạch ngân sách và hướng tới cuộc sống sinh viên chủ động hơn.
+        </p>
+        <div class="welcome-art" aria-hidden="true">🎓 📚</div>
+      </div>
+
+      <div class="login-card">
+        <h2 id="formHeading">Bắt đầu sử dụng</h2>
+        <p class="intro" id="formIntro">Nhập thông tin để cá nhân hóa ví của bạn.</p>
+
+        <form id="profileForm" class="form-stack">
+          <div class="field">
+            <label id="nameLabel" for="userNameInput">Họ tên</label>
+            <input id="userNameInput" autocomplete="name" required placeholder="Ví dụ: Nguyễn Minh Anh">
+          </div>
+
+          <div class="field">
+            <label id="ageLabel" for="ageInput">Tuổi</label>
+            <input id="ageInput" type="number" min="13" max="120" required placeholder="Ví dụ: 20">
+          </div>
+
+          <div class="field">
+            <label id="languageLabel" for="languageSelect">Ngôn ngữ</label>
+            <select id="languageSelect">
+              <option value="vi">Tiếng Việt</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
+          <button class="primary" id="startButton" type="submit">Bắt đầu</button>
+        </form>
+
+        <div class="link-row">
+          Website:
+          <a href="#welcomeScreen" id="websiteLink">Student Wallet</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Application -->
+  <div class="app-shell hidden" id="appShell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="wallet-mark" aria-hidden="true">▣</span>
+        <span class="brand-text">Ví Sinh Viên</span>
+      </div>
+
+      <nav class="nav-list" aria-label="Điều hướng chính">
+        <button class="nav-button active" data-page="home">
+          <span class="nav-icon">⌂</span><span class="nav-label" data-i18n="navHome">Trang chủ</span>
+        </button>
+        <button class="nav-button" data-page="plan">
+          <span class="nav-icon">▦</span><span class="nav-label" data-i18n="navPlan">Lập kế hoạch</span>
+        </button>
+        <button class="nav-button" data-page="transactions">
+          <span class="nav-icon">＋</span><span class="nav-label" data-i18n="navTransactions">Thu chi</span>
+        </button>
+        <button class="nav-button" data-page="stats">
+          <span class="nav-icon">▥</span><span class="nav-label" data-i18n="navStats">Thống kê</span>
+        </button>
+        <button class="nav-button" data-page="settings">
+          <span class="nav-icon">⚙</span><span class="nav-label" data-i18n="navSettings">Cài đặt</span>
+        </button>
+      </nav>
+
+      <button class="logout-button" id="logoutButton">
+        ↪ <span class="logout-label" data-i18n="logout">Đăng xuất</span>
+      </button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="greeting">
+          <h1><span id="helloText">Xin chào</span>, <span id="greetingName">Bạn</span>! 👋</h1>
+          <p id="subtitle">Cùng quản lý tài chính thật thông minh nhé.</p>
+        </div>
+        <div class="top-actions">
+          <select class="period-select" id="periodSelect" aria-label="Chọn kỳ xem">
+            <option value="week">Tuần này</option>
+            <option value="month">Tháng này</option>
+          </select>
+          <span class="notice-small" id="todayDate"></span>
+        </div>
+      </header>
+
+      <!-- Home -->
+      <section class="page active" id="page-home">
+        <div class="card-panel overview-banner">
+          <div class="balance-block">
+            <div class="round-icon" aria-hidden="true">▣</div>
+            <div>
+              <span class="metric-label" data-i18n="currentBalance">Số tiền còn lại</span>
+              <strong class="metric-value" id="balanceValue">₫1.500.000</strong>
+            </div>
+          </div>
+          <div class="plan-block">
+            <div class="round-icon" aria-hidden="true">◎</div>
+            <div>
+              <span class="metric-label" data-i18n="planPeriod">Kỳ kế hoạch</span>
+              <strong class="metric-value" id="planDates">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat-card income">
+            <span class="metric-label" data-i18n="incomeTotal">Tổng thu nhập</span>
+            <strong class="metric-value" id="incomeValue">₫0</strong>
+          </article>
+          <article class="stat-card expense">
+            <span class="metric-label" data-i18n="expenseTotal">Tổng chi tiêu</span>
+            <strong class="metric-value" id="expenseValue">₫0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="metric-label" data-i18n="budgetRemaining">Ngân sách còn lại</span>
+            <strong class="metric-value" id="budgetValue">₫0</strong>
+          </article>
+        </div>
+
+        <div id="balanceAlert" class="alert" role="status"></div>
+
+        <div class="overview-grid">
+          <section class="card-panel">
+            <h2 data-i18n="spendingOverview">Tổng quan chi tiêu</h2>
+            <div class="chart-container">
+              <canvas id="pieChart" aria-label="Biểu đồ tròn chi tiêu"></canvas>
+            </div>
+          </section>
+
+          <aside class="suggestion">
+            <h3 data-i18n="tipToday">💡 Gợi ý hôm nay</h3>
+            <p id="tipText">Bạn có thể ghi lại khoản chi ngay sau khi mua sắm để theo dõi ngân sách chính xác hơn.</p>
+            <div class="mascot" aria-hidden="true">🐱</div>
+          </aside>
+        </div>
+
+        <section class="card-panel" style="margin-top:18px">
+          <h2 data-i18n="categoryBreakdown">Chi tiêu theo danh mục</h2>
+          <div class="category-list" id="categoryBreakdown"></div>
+        </section>
+      </section>
+
+      <!-- Budget plan -->
+      <section class="page" id="page-plan">
+        <section class="card-panel">
+          <h2 data-i18n="planTitle">Lập kế hoạch chi tiêu</h2>
+          <p class="notice-small" data-i18n="planDescription">
+            Nhập ngân sách và chọn các khoản cần theo dõi. Đây là kế hoạch cá nhân, chưa liên kết tài khoản ngân hàng.
+          </p>
+
+          <form id="budgetForm" class="form-stack">
+            <div class="field">
+              <label data-i18n="budgetAmount" for="budgetInput">Ngân sách (VND)</label>
+              <input id="budgetInput" type="number" min="0" step="1000" placeholder="1500000" required>
+            </div>
+
+            <div class="field">
+              <label data-i18n="period" for="budgetPeriod">Chu kỳ</label>
+              <select id="budgetPeriod">
+                <option value="week" data-i18n="weekly">Theo tuần</option>
+                <option value="month" data-i18n="monthly">Theo tháng</option>
+              </select>
+            </div>
+
+            <h3 data-i18n="chooseCategories">Chọn danh mục chi tiêu</h3>
+            <div class="category-checks">
+              <div class="check-card"><label><input type="checkbox" value="family" checked><span data-i18n="family">Gia đình</span></label></div>
+              <div class="check-card"><label><input type="checkbox" value="food" checked><span data-i18n="food">Ăn uống</span></label></div>
+              <div class="check-card"><label><input type="checkbox" value="rent" checked><span data-i18n="rent">Tiền nhà</span></label></div>
+              <div class="check-card"><label><input type="checkbox" value="transport" checked><span data-i18n="transport">Đi lại</span></label></div>
+              <div class="check-card"><label><input type="checkbox" value="study"><span data-i18n="study">Học tập</span></label></div>
+              <div class="check-card"><label><input type="checkbox" value="other"><span data-i18n="other">Khác</span></label></div>
+            </div>
+
+            <button type="submit" class="primary" data-i18n="savePlan">Lưu kế hoạch</button>
+          </form>
+        </section>
+
+        <section class="card-panel" style="margin-top:18px">
+          <h2 data-i18n="planSummary">Tóm tắt kế hoạch</h2>
+          <p id="planSummaryText" class="notice-small">Bạn chưa thiết lập ngân sách.</p>
+        </section>
+      </section>
+
+      <!-- Income and expense -->
+      <section class="page" id="page-transactions">
+        <div class="two-column">
+          <section class="card-panel">
+            <h2 data-i18n="recordTransaction">Ghi thu / chi</h2>
+            <form id="transactionForm" class="form-stack">
+              <div class="field">
+                <label data-i18n="transactionType" for="transactionType">Loại giao dịch</label>
+                <select id="transactionType">
+                  <option value="expense" data-i18n="expense">Chi tiêu</option>
+                  <option value="income" data-i18n="income">Thu nhập</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label data-i18n="description" for="transactionName">Tên khoản thu/chi</label>
+                <input id="transactionName" required placeholder="Ví dụ: tiền ăn trưa">
+              </div>
+
+              <div class="field">
+                <label data-i18n="category" for="transactionCategory">Danh mục</label>
+                <select id="transactionCategory">
+                  <option value="family" data-i18n="family">Gia đình</option>
+                  <option value="food" data-i18n="food">Ăn uống</option>
+                  <option value="rent" data-i18n="rent">Tiền nhà</option>
+                  <option value="transport" data-i18n="transport">Đi lại</option>
+                  <option value="study" data-i18n="study">Học tập</option>
+                  <option value="other" data-i18n="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label data-i18n="amountVND" for="transactionAmount">Số tiền (VND)</label>
+                <input id="transactionAmount" type="number" min="1" step="1000" required placeholder="70000">
+              </div>
+
+              <div class="field">
+                <label data-i18n="date" for="transactionDate">Ngày</label>
+                <input id="transactionDate" type="date" required>
+              </div>
+
+              <div class="field">
+                <label data-i18n="note" for="transactionNote">Ghi chú</label>
+                <textarea id="transactionNote" placeholder="Ghi chú thêm (không bắt buộc)"></textarea>
+              </div>
+
+              <button class="primary" type="submit" data-i18n="saveTransaction">Lưu giao dịch</button>
+            </form>
+          </section>
+
+          <section class="card-panel">
+            <h2 data-i18n="recentTransactions">Giao dịch gần đây</h2>
+            <div class="transaction-list" id="transactionList"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Statistics -->
+      <section class="page" id="page-stats">
+        <div class="two-column">
+          <section class="card-panel">
+            <h2 data-i18n="pieChartTitle">Biểu đồ tròn: cơ cấu chi tiêu</h2>
+            <div class="chart-container">
+              <canvas id="statsPieChart" aria-label="Biểu đồ tròn"></canvas>
+            </div>
+          </section>
+          <section class="card-panel">
+            <h2 data-i18n="barChartTitle">Biểu đồ cột: thu và chi</h2>
+            <div class="chart-container">
+              <canvas id="barChart" aria-label="Biểu đồ cột"></canvas>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Bank transfer and settings -->
+      <section class="page" id="page-settings">
+        <div class="two-column">
+          <section class="card-panel">
+            <h2 data-i18n="transferTitle">Chuyển khoản ngân hàng</h2>
+            <p class="notice-small" data-i18n="transferDisclaimer">
+              Bản mẫu chỉ ghi nhận giao dịch mô phỏng; không gửi tiền và không kết nối ngân hàng.
+            </p>
+
+            <form id="transferForm" class="form-stack">
+              <div class="field">
+                <label data-i18n="bank" for="bankSelect">Ngân hàng</label>
+                <select id="bankSelect">
+                  <option>Vietcombank</option>
+                  <option>BIDV</option>
+                  <option>Agribank</option>
+                  <option>VietinBank</option>
+                  <option>Techcombank</option>
+                  <option>MB Bank</option>
+                  <option>ACB</option>
+                  <option>VPBank</option>
+                  <option>TPBank</option>
+                  <option>Sacombank</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label data-i18n="recipient" for="recipientName">Tên người nhận</label>
+                <input id="recipientName" required placeholder="Tên người nhận">
+              </div>
+
+              <div class="field">
+                <label data-i18n="accountNumber" for="accountNumber">Số tài khoản</label>
+                <input id="accountNumber" inputmode="numeric" required placeholder="Nhập số tài khoản">
+              </div>
+
+              <div class="field">
+                <label data-i18n="amountVND" for="transferAmount">Số tiền (VND)</label>
+                <input id="transferAmount" type="number" min="1" step="1000" required placeholder="100000">
+              </div>
+
+              <div class="field">
+                <label data-i18n="transferNote" for="transferNote">Nội dung chuyển khoản</label>
+                <input id="transferNote" placeholder="Ví dụ: tiền sách">
+              </div>
+
+              <button class="primary" type="submit" data-i18n="simulateTransfer">Mô phỏng chuyển khoản</button>
+            </form>
+          </section>
+
+          <section class="card-panel">
+            <h2 data-i18n="settingsTitle">Cài đặt</h2>
+            <div class="form-stack">
+              <div class="field">
+                <label data-i18n="language" for="settingsLanguage">Ngôn ngữ</label>
+                <select id="settingsLanguage">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="field">
+                <label data-i18n="lowBalanceThreshold" for="thresholdInput">Ngưỡng cảnh báo số dư thấp (VND)</label>
+                <input id="thresholdInput" type="number" min="0" step="10000" value="300000">
+              </div>
+              <button class="secondary" id="saveSettings" type="button" data-i18n="saveSettings">Lưu cài đặt</button>
+              <button class="danger-button" id="clearData" type="button" data-i18n="clearData">Xóa dữ liệu trên thiết bị này</button>
+              <p class="notice-small" data-i18n="localStorageNote">
+                Dữ liệu mẫu được lưu trong trình duyệt trên thiết bị này bằng localStorage. Không nhập thông tin ngân hàng thật.
+              </p>
+              <a href="#welcomeScreen" id="publicLink" class="notice-small">Student Wallet</a>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Mobile bottom navigation -->
+  <nav class="mobile-nav hidden" id="mobileNav" aria-label="Điều hướng điện thoại">
+    <button class="nav-button active" data-page="home"><span class="nav-icon">⌂</span><span class="nav-label" data-i18n="navHome">Trang chủ</span></button>
+    <button class="nav-button" data-page="plan"><span class="nav-icon">▦</span><span class="nav-label" data-i18n="navPlan">Kế hoạch</span></button>
+    <button class="nav-button" data-page="transactions"><span class="nav-icon">＋</span><span class="nav-label" data-i18n="navTransactions">Thu chi</span></button>
+    <button class="nav-button" data-page="stats"><span class="nav-icon">▥</span><span class="nav-label" data-i18n="navStats">Thống kê</span></button>
+    <button class="nav-button" data-page="settings"><span class="nav-icon">⚙</span><span class="nav-label" data-i18n="navSettings">Cài đặt</span></button>
+  </nav>
+
+  <script>
+    const translations = {
+      vi: {
+        welcomeHeading: "Ví Sinh Viên",
+        welcomeDescription: "Quản lý chi tiêu thông minh, lập kế hoạch ngân sách và hướng tới cuộc sống sinh viên chủ động hơn.",
+        formHeading: "Bắt đầu sử dụng",
+        formIntro: "Nhập thông tin để cá nhân hóa ví của bạn.",
+        nameLabel: "Họ tên", ageLabel: "Tuổi", languageLabel: "Ngôn ngữ",
+        startButton: "Bắt đầu", hello: "Xin chào",
+        subtitle: "Cùng quản lý tài chính thật thông minh nhé.",
+        navHome: "Trang chủ", navPlan: "Kế hoạch", navTransactions: "Thu chi",
+        navStats: "Thống kê", navSettings: "Cài đặt", logout: "Đăng xuất",
+        currentBalance: "Số tiền còn lại", planPeriod: "Kỳ kế hoạch",
+        incomeTotal: "Tổng thu nhập", expenseTotal: "Tổng chi tiêu",
+        budgetRemaining: "Ngân sách còn lại", spendingOverview: "Tổng quan chi tiêu",
+        tipToday: "💡 Gợi ý hôm nay", categoryBreakdown: "Chi tiêu theo danh mục",
+        planTitle: "Lập kế hoạch chi tiêu",
+        planDescription: "Nhập ngân sách và chọn các khoản cần theo dõi. Đây là kế hoạch cá nhân, chưa liên kết tài khoản ngân hàng.",
+        budgetAmount: "Ngân sách (VND)", period: "Chu kỳ", weekly: "Theo tuần",
+        monthly: "Theo tháng", chooseCategories: "Chọn danh mục chi tiêu",
+        family: "Gia đình", food: "Ăn uống", rent: "Tiền nhà",
+        transport: "Đi lại", study: "Học tập", other: "Khác",
+        savePlan: "Lưu kế hoạch", planSummary: "Tóm tắt kế hoạch",
+        recordTransaction: "Ghi thu / chi", transactionType: "Loại giao dịch",
+        expense: "Chi tiêu", income: "Thu nhập", description: "Tên khoản thu/chi",
+        category: "Danh mục", amountVND: "Số tiền (VND)", date: "Ngày",
+        note: "Ghi chú", saveTransaction: "Lưu giao dịch",
+        recentTransactions: "Giao dịch gần đây",
+        pieChartTitle: "Biểu đồ tròn: cơ cấu chi tiêu",
+        barChartTitle: "Biểu đồ cột: thu và chi",
+        transferTitle: "Chuyển khoản ngân hàng",
+        transferDisclaimer: "Bản mẫu chỉ ghi nhận giao dịch mô phỏng; không gửi tiền và không kết nối ngân hàng.",
+        bank: "Ngân hàng", recipient: "Tên người nhận", accountNumber: "Số tài khoản",
+        transferNote: "Nội dung chuyển khoản", simulateTransfer: "Mô phỏng chuyển khoản",
+        settingsTitle: "Cài đặt", language: "Ngôn ngữ",
+        lowBalanceThreshold: "Ngưỡng cảnh báo số dư thấp (VND)",
+        saveSettings: "Lưu cài đặt", clearData: "Xóa dữ liệu trên thiết bị này",
+        localStorageNote: "Dữ liệu được lưu trong trình duyệt trên thiết bị này. Không nhập thông tin ngân hàng thật.",
+        lowAlert: "Số dư của bạn đang thấp. Hãy xem lại các khoản chi.",
+        healthyAlert: "Số dư của bạn đang ổn. Hãy tiếp tục theo dõi chi tiêu.",
+        saved: "Đã lưu", noTransactions: "Chưa có giao dịch nào.",
+        noBudget: "Bạn chưa thiết lập ngân sách.",
+        budgetSummary: "Ngân sách {amount} cho mỗi {period}.",
+        transferDone: "Đã ghi nhận giao dịch mô phỏng. Không có tiền thật được chuyển.",
+        confirmClear: "Bạn có chắc muốn xóa toàn bộ dữ liệu đã lưu trên thiết bị này?",
+        transactionRemoved: "Đã xóa giao dịch."
+      },
+      en: {
+        welcomeHeading: "Student Wallet",
+        welcomeDescription: "Track spending, plan your budget, and take control of student life with a simple personal wallet.",
+        formHeading: "Get started",
+        formIntro: "Enter your details to personalize your wallet.",
+        nameLabel: "Name", ageLabel: "Age", languageLabel: "Language",
+        startButton: "Start", hello: "Hello",
+        subtitle: "Take control of your student finances.",
+        navHome: "Home", navPlan: "Plan", navTransactions: "Activity",
+        navStats: "Stats", navSettings: "Settings", logout: "Log out",
+        currentBalance: "Available balance", planPeriod: "Plan period",
+        incomeTotal: "Total income", expenseTotal: "Total spending",
+        budgetRemaining: "Budget remaining", spendingOverview: "Spending overview",
+        tipToday: "💡 Today's tip", categoryBreakdown: "Spending by category",
+        planTitle: "Create a budget plan",
+        planDescription: "Set a budget and choose categories to track. This is a personal planner, not connected to a bank.",
+        budgetAmount: "Budget (VND)", period: "Period", weekly: "Weekly",
+        monthly: "Monthly", chooseCategories: "Choose spending categories",
+        family: "Family", food: "Food", rent: "Rent",
+        transport: "Transport", study: "Study", other: "Other",
+        savePlan: "Save plan", planSummary: "Plan summary",
+        recordTransaction: "Record income / expense", transactionType: "Transaction type",
+        expense: "Expense", income: "Income", description: "Transaction name",
+        category: "Category", amountVND: "Amount (VND)", date: "Date",
+        note: "Note", saveTransaction: "Save transaction",
+        recentTransactions: "Recent transactions",
+        pieChartTitle: "Pie chart: spending breakdown",
+        barChartTitle: "Bar chart: income and expenses",
+        transferTitle: "Bank transfer",
+        transferDisclaimer: "This prototype only records a simulated transfer; it does not send money or connect to a bank.",
+        bank: "Bank", recipient: "Recipient name", accountNumber: "Account number",
+        transferNote: "Transfer note", simulateTransfer: "Simulate transfer",
+        settingsTitle: "Settings", language: "Language",
+        lowBalanceThreshold: "Low balance alert threshold (VND)",
+        saveSettings: "Save settings", clearData: "Clear data on this device",
+        localStorageNote: "Data is stored in this browser on this device. Do not enter real bank credentials.",
+        lowAlert: "Your balance is running low. Review your spending.",
+        healthyAlert: "Your balance looks healthy. Keep tracking your spending.",
+        saved: "Saved", noTransactions: "No transactions yet.",
+        noBudget: "You haven't set a budget yet.",
+        budgetSummary: "Budget: {amount} per {period}.",
+        transferDone: "Simulated transfer recorded. No real money was transferred.",
+        confirmClear: "Are you sure you want to delete all saved data on this device?",
+        transactionRemoved: "Transaction deleted."
+      }
+    };
+
+    const CATEGORY_KEYS = ["family", "food", "rent", "transport", "study", "other"];
+    const defaultState = {
+      user: null,
+      language: "vi",
+      budget: 1500000,
+      period: "week",
+      threshold: 300000,
+      transactions: []
+    };
+
+    let state = loadState();
+    let pieChart, statsPieChart, barChart;
+    let activePage = "home";
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("studentWalletData"));
+        return { ...defaultState, ...(saved || {}) };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem("studentWalletData", JSON.stringify(state));
+    }
+
+    function t(key) {
+      return (translations[state.language] || translations.vi)[key] || key;
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat(state.language === "vi" ? "vi-VN" : "en-US", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0
+      }).format(Number(value) || 0);
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "";
+      return new Date(dateString + "T12:00:00").toLocaleDateString(
+        state.language === "vi" ? "vi-VN" : "en-US",
+        { day: "2-digit", month: "short", year: "numeric" }
+      );
+    }
+
+    function categoryName(key) {
+      return t(key) || t("other");
+    }
+
+    function showApp() {
+      document.getElementById("welcomeScreen").classList.add("hidden");
+      document.getElementById("appShell").classList.remove("hidden");
+      document.getElementById("mobileNav").classList.remove("hidden");
+      applyLanguage();
+      render();
+      showPage(activePage);
+    }
+
+    function showWelcome() {
+      document.getElementById("appShell").classList.add("hidden");
+      document.getElementById("mobileNav").classList.add("hidden");
+      document.getElementById("welcomeScreen").classList.remove("hidden");
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = state.language;
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.dataset.i18n;
+        if (translations[state.language][key]) el.textContent = t(key);
+      });
+
+      const fields = {
+        welcomeHeading: "welcomeHeading",
+        welcomeDescription: "welcomeDescription",
+        formHeading: "formHeading",
+        formIntro: "formIntro",
+        nameLabel: "nameLabel",
+        ageLabel: "ageLabel",
+        languageLabel: "languageLabel",
+        startButton: "startButton",
+        helloText: "hello"
+      };
+
+      Object.entries(fields).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = t(key);
+      });
+
+      const settingsLanguage = document.getElementById("settingsLanguage");
+      if (settingsLanguage) settingsLanguage.value = state.language;
+
+      updateGreeting();
+      updateDate();
+      render();
+    }
+
+    function updateGreeting() {
+      const name = state.user?.name || (state.language === "vi" ? "Bạn" : "there");
+      document.getElementById("greetingName").textContent = name;
+      document.getElementById("subtitle").textContent = t("subtitle");
+    }
+
+    function updateDate() {
+      const locale = state.language === "vi" ? "vi-VN" : "en-US";
+      document.getElementById("todayDate").textContent =
+        new Date().toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      document.getElementById("planDates").textContent =
+        start.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" }) +
+        " – " +
+        end.toLocaleDateString(locale, { day: "2-digit", month: "2-digit" });
+    }
+
+    function getTotals() {
+      return state.transactions.reduce((totals, item) => {
+        totals[item.type] += Number(item.amount);
+        if (item.type === "expense") {
+          totals.categories[item.category] = (totals.categories[item.category] || 0) + Number(item.amount);
+        }
+        return totals;
+      }, { income: 0, expense: 0, categories: {} });
+    }
+
+    function renderCategoryBreakdown(categories) {
+      const container = document.getElementById("categoryBreakdown");
+      const entries = CATEGORY_KEYS.map(key => [key, categories[key] || 0]);
+      const largest = Math.max(...entries.map(([, amount]) => amount), 1);
+
+      container.innerHTML = entries.map(([key, amount]) => `
+        <div class="category-row">
+          <div class="category-info">
+            <span>${escapeHTML(categoryName(key))}</span>
+            <strong>${money(amount)}</strong>
+          </div>
+          <div class="progress"><span style="width:${Math.round(amount / largest * 100)}%"></span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderTransactions() {
+      const list = document.getElementById("transactionList");
+      if (!state.transactions.length) {
+        list.innerHTML = `<p class="notice-small">${t("noTransactions")}</p>`;
+        return;
+      }
+
+      list.innerHTML = [...state.transactions]
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 12)
+        .map(item => `
+          <article class="transaction">
+            <div>
+              <div class="transaction-title">${escapeHTML(item.name)}</div>
+              <div class="transaction-meta">
+                ${escapeHTML(categoryName(item.category))} · ${formatDate(item.date)}
+                ${item.note ? " · " + escapeHTML(item.note) : ""}
+              </div>
+            </div>
+            <span class="${item.type === "income" ? "amount-in" : "amount-out"}">
+              ${item.type === "income" ? "+" : "−"}${money(item.amount)}
+            </span>
+          </article>
+        `).join("");
+    }
+
+    function renderPlan() {
+      const summary = document.getElementById("planSummaryText");
+      if (!state.budget) {
+        summary.textContent = t("noBudget");
+      } else {
+        const periodName = state.period === "week" ? t("weekly").toLowerCase() : t("monthly").toLowerCase();
+        summary.textContent = t("budgetSummary")
+          .replace("{amount}", money(state.budget))
+          .replace("{period}", periodName);
+      }
+
+      document.getElementById("budgetInput").value = state.budget || "";
+      document.getElementById("budgetPeriod").value = state.period;
+    }
+
+    function render() {
+      if (!state.user) return;
+
+      updateGreeting();
+      updateDate();
+
+      const totals = getTotals();
+      const remaining = Math.max(0, Number(state.budget || 0) + totals.income - totals.expense);
+
+      document.getElementById("incomeValue").textContent = money(totals.income);
+      document.getElementById("expenseValue").textContent = money(totals.expense);
+      document.getElementById("budgetValue").textContent = money(remaining);
+      document.getElementById("balanceValue").textContent = money(remaining);
+
+      const alert = document.getElementById("balanceAlert");
+      const low = remaining <= Number(state.threshold || 0);
+      alert.classList.toggle("low", low);
+      alert.textContent = `${low ? t("lowAlert") : t("healthyAlert")} · ${formatDate(todayISO())}`;
+
+      renderCategoryBreakdown(totals.categories);
+      renderTransactions();
+      renderPlan();
+      updateCharts(totals);
+    }
+
+    function updateCharts(totals) {
+      const values = CATEGORY_KEYS.map(key => totals.categories[key] || 0);
+      const labels = CATEGORY_KEYS.map(categoryName);
+      const pieData = {
+        labels,
+        datasets: [{
+          data: values.some(Boolean) ? values : [1, 1, 1, 1, 1, 1],
+          backgroundColor: ["#4779c7", "#62c5bd", "#a97dcc", "#87a9e8", "#f0bf65", "#9aa9bd"],
+          borderWidth: 0
+        }]
+      };
+
+      const barData = {
+        labels: [t("income"), t("expense")],
+        datasets: [{
+          label: "VND",
+          data: [totals.income, totals.expense],
+          backgroundColor: ["#62c5bd", "#4779c7"],
+          borderRadius: 8
+        }]
+      };
+
+      const common = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } }
+      };
+
+      if (!window.Chart) return;
+
+      if (pieChart) {
+        pieChart.data = pieData;
+        pieChart.update();
+      } else {
+        pieChart = new Chart(document.getElementById("pieChart"), {
+          type: "doughnut",
+          data: pieData,
+          options: { ...common, cutout: "62%" }
+        });
+      }
+
+      if (statsPieChart) {
+        statsPieChart.data = pieData;
+        statsPieChart.update();
+      } else {
+        statsPieChart = new Chart(document.getElementById("statsPieChart"), {
+          type: "pie",
+          data: pieData,
+          options: common
+        });
+      }
+
+      if (barChart) {
+        barChart.data = barData;
+        barChart.update();
+      } else {
+        barChart = new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: barData,
+          options: {
+            ...common,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: value => new Intl.NumberFormat(state.language === "vi" ? "vi-VN" : "en-US").format(value)
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function showPage(pageName) {
+      activePage = pageName;
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.toggle("active", page.id === `page-${pageName}`);
+      });
+      document.querySelectorAll(".nav-button[data-page]").forEach(button => {
+        button.classList.toggle("active", button.dataset.page === pageName);
+      });
+
+      // Chart.js needs a resize when a chart is first shown inside a hidden page.
+      setTimeout(() => {
+        [pieChart, statsPieChart, barChart].forEach(chart => chart?.resize());
+      }, 30);
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    document.getElementById("profileForm").addEventListener("submit", event => {
+      event.preventDefault();
+      state.user = {
+        name: document.getElementById("userNameInput").value.trim(),
+        age: Number(document.getElementById("ageInput").value)
+      };
+      state.language = document.getElementById("languageSelect").value;
+      saveState();
+      showApp();
+    });
+
+    document.querySelectorAll(".nav-button[data-page]").forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    document.getElementById("budgetForm").addEventListener("submit", event => {
+      event.preventDefault();
+      state.budget = Number(document.getElementById("budgetInput").value);
+      state.period = document.getElementById("budgetPeriod").value;
+      saveState();
+      render();
+      alert(t("saved"));
+    });
+
+    document.getElementById("transactionDate").value = todayISO();
+
+    document.getElementById("transactionForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const amount = Number(document.getElementById("transactionAmount").value);
+      if (!Number.isFinite(amount) || amount <= 0) return;
+
+      state.transactions.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        type: document.getElementById("transactionType").value,
+        name: document.getElementById("transactionName").value.trim(),
+        category: document.getElementById("transactionCategory").value,
+        amount,
+        date: document.getElementById("transactionDate").value || todayISO(),
+        note: document.getElementById("transactionNote").value.trim()
+      });
+
+      saveState();
+      render();
+      event.target.reset();
+      document.getElementById("transactionDate").value = todayISO();
+    });
+
+    document.getElementById("transferForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const amount = Number(document.getElementById("transferAmount").value);
+      if (!Number.isFinite(amount) || amount <= 0) return;
+
+      state.transactions.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        type: "expense",
+        name: `Chuyển khoản · ${document.getElementById("recipientName").value.trim()}`,
+        category: "other",
+        amount,
+        date: todayISO(),
+        note: `${document.getElementById("bankSelect").value} · ${document.getElementById("transferNote").value.trim()}`
+      });
+
+      saveState();
+      render();
+      event.target.reset();
+      alert(t("transferDone"));
+    });
+
+    document.getElementById("settingsLanguage").addEventListener("change", event => {
+      state.language = event.target.value;
+      document.getElementById("languageSelect").value = state.language;
+      saveState();
+      applyLanguage();
+    });
+
+    document.getElementById("saveSettings").addEventListener("click", () => {
+      state.threshold = Math.max(0, Number(document.getElementById("thresholdInput").value) || 0);
+      saveState();
+      render();
+      alert(t("saved"));
+    });
+
+    document.getElementById("clearData").addEventListener("click", () => {
+      if (!confirm(t("confirmClear"))) return;
+      localStorage.removeItem("studentWalletData");
+      state = { ...defaultState };
+      showWelcome();
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", showWelcome);
+
+    // Restore the profile if the same browser has saved it before.
+    if (state.user?.name) {
+      document.getElementById("userNameInput").value = state.user.name;
+      document.getElementById("ageInput").value = state.user.age || "";
+      document.getElementById("languageSelect").value = state.language;
+      document.getElementById("thresholdInput").value = state.threshold;
+      showApp();
+    } else {
+      document.getElementById("languageSelect").value = state.language;
+    }
+  </script>
+</body>
+</html>
